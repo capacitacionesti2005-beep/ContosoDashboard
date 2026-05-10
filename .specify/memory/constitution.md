@@ -1,50 +1,35 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Constitución de ContosoDashboard
 
-## Core Principles
+## Principios Fundamentales
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Transparencia con Propósito de Entrenamiento
+ContosoDashboard DEBE seguir siendo un artefacto de entrenamiento con un propósito educativo claro. El código DEBE explicar patrones mediante implementación legible, datos de ejemplo y comentarios explícitos. Ninguna característica puede presentarse como lista para producción; toda guía de seguridad, arquitectura y despliegue DEBE enmarcarse como ejemplos de entrenamiento.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Seguridad como Ejemplo
+La seguridad DEBE ser demostrable, utilizable y explícita en el repositorio. Los ejemplos de autorización y autenticación DEBEN aplicarse tanto en las páginas como en los servicios, y el código de entrenamiento DEBE mostrar las decisiones de defensa en profundidad en lugar de ocultarlas tras comportamientos opacos del framework. Los ejemplos de identidad simulada y roles DEBEN ilustrar compensaciones reales de seguridad mientras mantienen el sistema seguro para entrenamiento sin conexión.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Aprendizaje Verificado con Pruebas y Especificaciones
+Todo cambio significativo DEBE capturarse en artefactos verificables. El trabajo de funcionalidades DEBE originarse en especificaciones, planes y tareas, y la implementación DEBE ser verificable mediante ejemplos, criterios de aceptación o escenarios ejecutables. Esto asegura que el repositorio permanezca como un cuaderno de aprendizaje en lugar de una implementación sin documentación.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Prioridad Off-line con Claridad de Migración
+El repositorio DEBE priorizar la ejecución local y sin conexión preservando rutas de migración claras hacia servicios en la nube. LocalDB, autenticación simulada y comportamiento de interfaz autocontenida son la configuración predeterminada. Cualquier abstracción preparada para la nube DEBE estar claramente separada, documentada y ser opcional para que la experiencia de entrenamiento no dependa de servicios externos.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Disciplina de Documentación y Proceso
+La documentación DEBE mantenerse sincronizada con el código y los objetivos de aprendizaje de este proyecto. La guía de inicio, las limitaciones de seguridad, las notas de arquitectura y las restricciones de entrenamiento DEBEN mantenerse en los documentos del proyecto. Las solicitudes de extracción y la retroalimentación de revisión DEBEN referenciar esta constitución y la versión actual para confirmar el cumplimiento.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Restricciones Adicionales
+Este proyecto es únicamente una implementación de entrenamiento. NO DEBE declarar estar listo para producción, requerir servicios en la nube externos ni almacenar credenciales reales de usuarios. El repositorio DEBE permanecer autocontenido con dependencias locales y datos de ejemplo. Todas las decisiones de diseño DEBEN priorizar claridad, reproducibilidad y ejecución segura sin conexión.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Flujo de Trabajo de Desarrollo
+El trabajo de funcionalidades DEBE seguir el flujo de trabajo Spec Kit: definir la funcionalidad en una especificación, crear un plan de implementación y generar tareas antes de codificar. Los cambios DEBEN revisarse frente a la constitución y documentarse en los resúmenes de PR. El riesgo, la complejidad y el valor de entrenamiento DEBEN hacerse explícitos en cada cambio no trivial.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Gobernanza
+Esta constitución es la fuente de verdad para la disciplina del proyecto y las prácticas aceptables. Cualquier enmienda DEBE actualizar este documento y referenciar el cambio en la solicitud de extracción asociada.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- Se requieren incrementos de versión mayor para cambios que alteren principios, gobernanza o el alcance de entrenamiento del proyecto.
+- Se requieren incrementos de versión menor para secciones añadidas, nuevas restricciones obligatorias o expansiones materiales de la guía de gobernanza.
+- Se requieren incrementos de parche para aclaraciones, mejoras de redacción y refinamientos no semánticos.
+- Cada solicitud de extracción DEBE citar la versión actual de la constitución y anotar cualquier desviación o excepción.
+- Las revisiones DEBEN verificar que la documentación siga siendo consistente con el código, que no queden tokens de marcador de posición sin explicar y que todas las fechas de gobernanza usen formato ISO.
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
-
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Versión**: 1.0.0 | **Ratificada**: 2026-05-09 | **Última Enmienda**: 2026-05-09
