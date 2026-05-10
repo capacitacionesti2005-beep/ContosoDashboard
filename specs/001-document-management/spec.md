@@ -9,6 +9,16 @@
 
 Contoso necesita permitir que los 5,000 empleados carguen documentos relacionados con el trabajo (PDF, documentos de Office, imágenes, archivos de texto), los organicen por categoría/proyecto, los compartan con miembros del equipo y realicen búsquedas eficientes. La característica debe integrarse con características existentes del panel mientras mantiene la seguridad en todos los niveles de acceso basado en roles (Empleado, Líder de Equipo, Gerente de Proyecto, Administrador).
 
+## Clarificaciones
+
+### Sesión 2026-05-10
+
+- Q: ¿Qué sucede cuando se elimina un proyecto? → A: Los documentos asociados se archivan (se marcan como eliminados/ocultos pero se retienen los datos) y se elimina la asociación del proyecto, manteniendo los documentos accesibles para quien los subió.
+- Q: ¿Deberían los documentos compartidos permitir re-compartición recursiva? → A: No. Solo el propietario original puede compartir documentos; los receptores solo pueden ver y descargar, no pueden re-compartir. Esto simplifica la implementación y auditoría, y proporciona control claro del propietario sobre el acceso.
+- Q: ¿Cómo deben manejarse los documentos archivados después de eliminar un proyecto? → A: Los documentos archivados permanecen visibles en búsqueda y "Mis Documentos" pero con insignia visual "ARCHIVADO" claramente visible. Esto permite acceso a documentos históricos para propósitos de auditoría mientras comunica visualmente su estado.
+- Q: ¿Qué sucede si el escaneo antivirus falla o no está disponible? → A: Bloquear completamente la carga con mensaje de error claro: "El sistema de verificación de seguridad no está disponible. Por favor, intente más tarde". Garantiza la integridad y seguridad del sistema.
+- Q: ¿Qué sucede cuando un usuario compartidor es desactivado o eliminado? → A: El usuario receptor mantiene acceso permanente al documento compartido. El acceso compartido es independiente del estado del usuario compartidor. Esto proporciona continuidad de colaboración y no penaliza al receptor por cambios en la estructura del equipo.
+
 ## Escenarios de Usuario y Pruebas *(obligatorio)*
 
 ### Historia de Usuario 1 - Cargar Documentos de Trabajo (Prioridad: P1)
@@ -129,7 +139,7 @@ Los usuarios necesitan eliminar documentos que cargaron, y los gerentes de proye
 
 - ¿Qué sucede cuando un usuario carga un archivo mientras está sin conexión? (El sistema debe poner en cola la carga cuando se restaura la conexión, o prevenir la carga con error claro)
 - ¿Cómo maneja el sistema nombres de archivo duplicados de diferentes cargadores? (El sistema genera nombres de archivo únicos usando GUIDs, previniendo conflictos)
-- ¿Qué sucede cuando se elimina un proyecto? (Todos los documentos asociados con el proyecto deben archivarse o moverse a documentos personales basado en política comercial - NECESITA ACLARACIÓN)
+- ¿Qué sucede cuando se elimina un proyecto? (Los documentos asociados con el proyecto se archivan —se marcan como eliminados/ocultos pero se retienen los datos— y se elimina la asociación del proyecto, manteniendo los documentos accesibles para quien los subió. Esto preserva la pista de auditoría y el trabajo del usuario mientras mantiene la consistencia referencial.)
 - ¿Cómo maneja el sistema virus o malware en cargas? (El sistema escanea todos los archivos cargados; los archivos infectados se rechazan con mensaje de error - asumir que escaneo antivirus está disponible)
 - ¿Qué sucede cuando el almacenamiento está lleno? (Fuera del alcance para la versión inicial; asumir espacio en disco local suficiente)
 
@@ -158,7 +168,7 @@ Los usuarios necesitan eliminar documentos que cargaron, y los gerentes de proye
 - **RF-019**: El sistema DEBE permitir a los propietarios de documentos y Gerentes de Proyecto eliminar documentos con un diálogo de confirmación
 - **RF-020**: El sistema DEBE proporcionar una vista "Documentos del Proyecto" dentro de los detalles del proyecto mostrando todos los documentos asociados con ese proyecto
 - **RF-021**: El sistema DEBE permitir a los miembros del equipo del proyecto ver y descargar documentos del proyecto basado en su rol de proyecto
-- **RF-022**: El sistema DEBE permitir a los propietarios de documentos compartir documentos con usuarios específicos con notificación [NECESITA ACLARACIÓN: ¿deberían los documentos compartidos también compartirse recursivamente si el destinatario los comparte con otros, o solo compartir directo?]
+- **RF-022**: El sistema DEBE permitir a los propietarios de documentos compartir documentos con usuarios específicos con notificación. Solo el propietario original puede compartir; los receptores solo tienen permisos de visualización y descarga, sin capacidad de re-compartir.
 - **RF-023**: El sistema DEBE enviar notificaciones en la aplicación cuando los documentos se comparten con usuarios
 - **RF-024**: El sistema DEBE proporcionar una vista "Compartido Conmigo" mostrando todos los documentos que otros usuarios han compartido explícitamente con el usuario actual
 - **RF-025**: El sistema DEBE registrar todas las actividades relacionadas con documentos (carga, descarga, eliminación, compartir) con propósitos de auditoría
