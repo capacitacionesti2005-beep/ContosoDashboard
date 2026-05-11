@@ -1,0 +1,171 @@
+@page "/document-upload"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Http
+@using ContosoDashboard.Services
+@inject DocumentService DocumentService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Cargar Documento</PageTitle>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1>Cargar Documento</h1>
+
+            <form @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+                <div class="form-group mb-3">
+                    <label for="title" class="form-label">Titulo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="title" @bind="uploadModel.Title" placeholder="Ej: Documento de prueba" required />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="description" class="form-label">Descripcion</label>
+                    <textarea class="form-control" id="description" @bind="uploadModel.Description" rows="3" placeholder="Descripcion opcional del documento"></textarea>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="category" class="form-label">Categoria <span class="text-danger">*</span></label>
+                    <select class="form-control" id="category" @bind="uploadModel.Category" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="ProjectDocs">Documentos de Proyecto</option>
+                        <option value="TeamResources">Recursos de Equipo</option>
+                        <option value="PersonalFiles">Archivos Personales</option>
+                        <option value="Reports">Informes</option>
+                        <option value="Presentations">Presentaciones</option>
+                        <option value="Other">Otro</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="file" class="form-label">Archivo <span class="text-danger">*</span></label>
+                    <InputFile class="form-control" id="file" OnChange="HandleFileSelected" required />
+                    <small class="text-muted">Maximo 25 MB. Formatos permitidos: PDF, Word, Excel, PowerPoint, imagenes, texto</small>
+                    @if (selectedFile != null)
+                    {
+                        <div class="form-text">@selectedFile.Name (@FormatFileSize(selectedFile.Size))</div>
+                    }
+                </div>
+
+                @if (isUploading)
+                {
+                    <div class="progress mb-3" role="progressbar" aria-label="Upload progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">Cargando...</div>
+                    </div>
+                }
+
+                <button type="submit" class="btn btn-primary" disabled="@isUploading">Subir</button>
+                <a href="/documents" class="btn btn-secondary">Cancelar</a>
+            </form>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@errorMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success mt-3">@successMessage</div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private IBrowserFile? selectedFile;
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool isUploading;
+
+    private UploadModel uploadModel = new();
+
+    private class UploadModel
+    {
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Category { get; set; } = "";
+    }
+
+    private void HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = "";
+        successMessage = "";
+        isUploading = true;
+
+        try
+        {
+            if (selectedFile == null)
+            {
+                errorMessage = "Selecciona un archivo.";
+                return;
+            }
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userIdValue = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdValue, out var userId))
+            {
+                errorMessage = "Debes iniciar sesion para cargar documentos.";
+                return;
+            }
+
+            await using var uploadStream = selectedFile.OpenReadStream(maxAllowedSize: 26_214_400);
+            await using var memoryStream = new MemoryStream();
+            await uploadStream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            var formFile = new FormFile(memoryStream, 0, memoryStream.Length, "file", selectedFile.Name)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = selectedFile.ContentType
+            };
+
+            var result = await DocumentService.UploadDocumentAsync(
+                formFile,
+                uploadModel.Title,
+                uploadModel.Description,
+                uploadModel.Category,
+                null,
+                new List<string>(),
+                userId);
+
+            if (!result.Success)
+            {
+                errorMessage = result.ErrorMessage;
+                return;
+            }
+
+            successMessage = "Documento cargado exitosamente.";
+            uploadModel = new UploadModel();
+            selectedFile = null;
+            NavigationManager.NavigateTo("/documents");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isUploading = false;
+        }
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len /= 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}

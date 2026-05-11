@@ -1,0 +1,37 @@
+@using ContosoDashboard.Models
+
+@if (Document != null && IsPdfOrImage())
+{
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Vista Previa</h5>
+        </div>
+        <div class="card-body">
+            @if (Document.MimeType?.Contains("pdf") ?? false)
+            {
+                <p class="text-muted">Archivo PDF - Descarga para ver el contenido completo</p>
+            }
+            else if (Document.MimeType?.StartsWith("image/") ?? false)
+            {
+                <img src="/api/documents/@Document.DocumentId/preview" class="img-fluid" alt="@Document.Title" />
+            }
+            else
+            {
+                <p class="text-muted">Vista previa no disponible para este tipo de archivo</p>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Document Document { get; set; }
+
+    private bool IsPdfOrImage()
+    {
+        if (Document == null) return false;
+        var pdf = Document.MimeType?.Contains("pdf") ?? false;
+        var image = Document.MimeType?.StartsWith("image/") ?? false;
+        return pdf || image;
+    }
+}

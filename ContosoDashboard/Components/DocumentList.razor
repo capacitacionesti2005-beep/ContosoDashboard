@@ -1,0 +1,106 @@
+@using ContosoDashboard.Models
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th @onclick="@(() => SortBy("Title"))" style="cursor: pointer;">
+                    Título <span class="sort-indicator">@GetSortIndicator("Title")</span>
+                </th>
+                <th>Categoría</th>
+                <th @onclick="@(() => SortBy("UploadedAt"))" style="cursor: pointer;">
+                    Fecha <span class="sort-indicator">@GetSortIndicator("UploadedAt")</span>
+                </th>
+                <th>Tamaño</th>
+                <th @onclick="@(() => SortBy("UploaderName"))" style="cursor: pointer;">
+                    Cargado por <span class="sort-indicator">@GetSortIndicator("UploaderName")</span>
+                </th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var doc in SortedDocuments)
+            {
+                <tr>
+                    <td>
+                        @if (doc.IsArchived)
+                        {
+                            <span class="badge bg-secondary">ARCHIVADO</span>
+                        }
+                        <a href="/document/@doc.DocumentId">@doc.Title</a>
+                    </td>
+                    <td>@doc.Category</td>
+                    <td>@doc.UploadedAt.ToString("dd/MM/yyyy")</td>
+                    <td>@FormatFileSize(doc.FileSizeBytes)</td>
+                    <td>@doc.UploaderName</td>
+                    <td>
+                        <a href="/document/@doc.DocumentId" class="btn btn-sm btn-info">Ver</a>
+                        @if (doc.CanDelete)
+                        {
+                            <button class="btn btn-sm btn-danger" @onclick="@(() => OnDelete(doc.DocumentId))">Eliminar</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<Document> Documents { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<int> OnDeleteRequested { get; set; }
+
+    private string CurrentSort = "UploadedAt";
+    private bool CurrentSortDescending = true;
+
+    private IEnumerable<Document> SortedDocuments
+    {
+        get
+        {
+            return (CurrentSort, CurrentSortDescending) switch
+            {
+                ("Title", false) => Documents.OrderBy(d => d.Title),
+                ("Title", true) => Documents.OrderByDescending(d => d.Title),
+                ("UploaderName", false) => Documents.OrderBy(d => d.UploaderName),
+                ("UploaderName", true) => Documents.OrderByDescending(d => d.UploaderName),
+                ("UploadedAt", false) => Documents.OrderBy(d => d.UploadedAt),
+                _ => Documents.OrderByDescending(d => d.UploadedAt)
+            };
+        }
+    }
+
+    private void SortBy(string column)
+    {
+        if (CurrentSort == column)
+            CurrentSortDescending = !CurrentSortDescending;
+        else
+            CurrentSort = column;
+    }
+
+    private string GetSortIndicator(string column)
+    {
+        if (CurrentSort != column) return "";
+        return CurrentSortDescending ? "▼" : "▲";
+    }
+
+    private async Task OnDelete(int documentId)
+    {
+        await OnDeleteRequested.InvokeAsync(documentId);
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}

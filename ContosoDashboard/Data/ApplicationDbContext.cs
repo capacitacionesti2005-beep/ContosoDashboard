@@ -18,6 +18,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProjectMember> ProjectMembers { get; set; } = null!;
     public DbSet<Announcement> Announcements { get; set; } = null!;
 
+    // Document Management
+    public DbSet<Document> Documents { get; set; } = null!;
+    public DbSet<DocumentShare> DocumentShares { get; set; } = null!;
+    public DbSet<DocumentAuditLog> DocumentAuditLogs { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -63,6 +68,80 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        // Configure Document relationships
+        modelBuilder.Entity<Document>()
+            .HasOne(d => d.Uploader)
+            .WithMany()
+            .HasForeignKey(d => d.UploadedBy)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Document>()
+            .HasOne(d => d.AssociatedProject)
+            .WithMany()
+            .HasForeignKey(d => d.AssociatedProjectId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Document>()
+            .HasMany(d => d.SharedWith)
+            .WithOne(ds => ds.Document)
+            .HasForeignKey(ds => ds.DocumentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Document>()
+            .HasMany(d => d.AuditLogs)
+            .WithOne(dal => dal.Document)
+            .HasForeignKey(dal => dal.DocumentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure DocumentShare relationships
+        modelBuilder.Entity<DocumentShare>()
+            .HasOne(ds => ds.SharedByUser)
+            .WithMany()
+            .HasForeignKey(ds => ds.SharedBy)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<DocumentShare>()
+            .HasOne(ds => ds.SharedWithUser)
+            .WithMany()
+            .HasForeignKey(ds => ds.SharedWith)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Add unique constraint for active shares
+        modelBuilder.Entity<DocumentShare>()
+            .HasIndex(ds => new { ds.DocumentId, ds.SharedWith, ds.RevokedAt })
+            .IsUnique()
+            .HasFilter("[RevokedAt] IS NULL");
+
+        // Configure indexes for Document performance
+        modelBuilder.Entity<Document>()
+            .HasIndex(d => new { d.UploadedBy, d.UploadedAt });
+
+        modelBuilder.Entity<Document>()
+            .HasIndex(d => new { d.AssociatedProjectId, d.IsArchived });
+
+        modelBuilder.Entity<Document>()
+            .HasIndex(d => new { d.Category, d.UploadedAt });
+
+        // Configure indexes for DocumentShare performance
+        modelBuilder.Entity<DocumentShare>()
+            .HasIndex(ds => new { ds.SharedWith, ds.RevokedAt });
+
+        modelBuilder.Entity<DocumentShare>()
+            .HasIndex(ds => new { ds.DocumentId, ds.RevokedAt });
+
+        modelBuilder.Entity<DocumentShare>()
+            .HasIndex(ds => new { ds.SharedBy, ds.SharedAt });
+
+        // Configure indexes for DocumentAuditLog performance
+        modelBuilder.Entity<DocumentAuditLog>()
+            .HasIndex(dal => new { dal.DocumentId, dal.Timestamp }).IsDescending(false, true);
+
+        modelBuilder.Entity<DocumentAuditLog>()
+            .HasIndex(dal => new { dal.UserId, dal.Timestamp }).IsDescending(false, true);
+
+        modelBuilder.Entity<DocumentAuditLog>()
+            .HasIndex(dal => new { dal.Action, dal.Timestamp }).IsDescending(false, true);
 
         // Seed initial data
         SeedData(modelBuilder);

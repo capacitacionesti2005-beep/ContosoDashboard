@@ -1,0 +1,150 @@
+@page "/document/{DocumentId:int}"
+@using ContosoDashboard.Services
+@using ContosoDashboard.Models
+@inject DocumentService DocumentService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<PageTitle>Detalles del Documento</PageTitle>
+
+<div class="container-fluid mt-4">
+    @if (document == null)
+    {
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <h1>@document.Title</h1>
+                <p class="text-muted">Cargado por @document.UploaderName el @document.UploadedAt.ToString("dd/MM/yyyy")</p>
+
+                @if (!string.IsNullOrEmpty(document.Description))
+                {
+                    <p>@document.Description</p>
+                }
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Información del Documento</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Categoría:</strong> @document.Category</li>
+                            <li><strong>Tamaño:</strong> @FormatFileSize(document.FileSizeBytes)</li>
+                            <li><strong>Tipo:</strong> @document.MimeType</li>
+                            @if (document.ProjectName != null)
+                            {
+                                <li><strong>Proyecto:</strong> @document.ProjectName</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn btn-primary" @onclick="DownloadDocument">
+                        <i class="bi bi-download"></i> Descargar
+                    </button>
+                    @if (document.CanDelete)
+                    {
+                        <button class="btn btn-danger" @onclick="DeleteDocument">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    }
+                    @if (document.CanShare)
+                    {
+                        <button class="btn btn-info" @onclick="ShareDocument">
+                            <i class="bi bi-share"></i> Compartir
+                        </button>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger mt-3">@errorMessage</div>
+                }
+            </div>
+
+            @if (IsPdfOrImage())
+            {
+                <div class="col-md-4">
+                    <DocumentPreview Document="document" />
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int DocumentId { get; set; }
+
+    private Document document;
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // TODO: Llamar a DocumentService.GetDocumentAsync(DocumentId)
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar documento: {ex.Message}";
+        }
+    }
+
+    private async Task DownloadDocument()
+    {
+        try
+        {
+            // TODO: Llamar a DocumentService.DownloadDocumentAsync
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteDocument()
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "¿Estás seguro? Esta acción es permanente."))
+            return;
+
+        try
+        {
+            // TODO: Llamar a DocumentService.DeleteDocumentAsync
+            NavigationManager.NavigateTo("/documents");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task ShareDocument()
+    {
+        // TODO: Mostrar modal para seleccionar usuario y compartir
+    }
+
+    private bool IsPdfOrImage()
+    {
+        if (document == null) return false;
+        var pdf = document.MimeType?.Contains("pdf") ?? false;
+        var image = document.MimeType?.StartsWith("image/") ?? false;
+        return pdf || image;
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}

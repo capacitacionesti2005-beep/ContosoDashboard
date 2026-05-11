@@ -1,0 +1,47 @@
+@using ContosoDashboard.Models
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <input type="text" class="form-control" placeholder="Buscar por título..." @bind="SearchTerm" @oninput="OnSearchChanged" />
+    </div>
+    <div class="col-md-3">
+        <select class="form-control" @bind="SelectedCategory" @onchange="OnFilterChanged">
+            <option value="">-- Todas las categorías --</option>
+            <option value="ProjectDocs">Documentos de Proyecto</option>
+            <option value="TeamResources">Recursos de Equipo</option>
+            <option value="PersonalFiles">Archivos Personales</option>
+            <option value="Reports">Informes</option>
+            <option value="Presentations">Presentaciones</option>
+            <option value="Other">Otro</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-outline-secondary w-100" @onclick="OnClearFilters">Limpiar Filtros</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+
+    private string SearchTerm = "";
+    private string SelectedCategory = "";
+
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value?.ToString() ?? "";
+        await OnSearch.InvokeAsync(SearchTerm);
+    }
+
+    private async Task OnFilterChanged()
+    {
+        // TODO: Trigger filter changes
+    }
+
+    private async Task OnClearFilters()
+    {
+        SearchTerm = "";
+        SelectedCategory = "";
+        await OnSearch.InvokeAsync("");
+    }
+}

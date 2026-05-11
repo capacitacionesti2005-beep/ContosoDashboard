@@ -1,0 +1,72 @@
+@page "/documents"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using ContosoDashboard.Models
+@using ContosoDashboard.Services
+@inject DocumentService DocumentService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Mis Documentos</PageTitle>
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Mis Documentos</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="/document-upload" class="btn btn-primary">
+                <i class="bi bi-cloud-upload"></i> Cargar Documento
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+    else if (documents == null)
+    {
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    }
+    else if (documents.Count == 0)
+    {
+        <div class="alert alert-info">
+            No tienes documentos cargados. <a href="/document-upload">Carga uno ahora</a>
+        </div>
+    }
+    else
+    {
+        <DocumentList Documents="documents" />
+    }
+</div>
+
+@code {
+    private List<Document>? documents;
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userIdValue = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdValue, out var userId))
+            {
+                errorMessage = "Debes iniciar sesion para ver tus documentos.";
+                documents = new List<Document>();
+                return;
+            }
+
+            documents = await DocumentService.GetMyDocumentsAsync(userId, sortBy: "UploadedAt", descending: true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            documents = new List<Document>();
+        }
+    }
+}

@@ -44,6 +44,12 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+// Register document management services
+builder.Services.AddScoped<DocumentService>();
+builder.Services.AddScoped<FileStorageService>();
+builder.Services.AddScoped<DocumentAuthService>();
+builder.Services.AddScoped<DocumentAuditService>();
+
 // Add HttpContextAccessor for accessing user claims
 builder.Services.AddHttpContextAccessor();
 
